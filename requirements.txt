@@ -2,3 +2,5 @@ Modules requis :
 pandas
 requests
 pyarrow
+numpy
+plotly
