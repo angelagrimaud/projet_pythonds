@@ -1,4 +1,3 @@
-Modules requis : 
 pandas
 requests
 pyarrow
