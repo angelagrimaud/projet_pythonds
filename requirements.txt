@@ -3,3 +3,4 @@ requests
 pyarrow
 numpy
 plotly
+scipy
