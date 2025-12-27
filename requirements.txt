@@ -2,5 +2,5 @@ Modules requis :
 pandas
 requests
 pyarrow
-geopandas
-cartiflette
+numpy
+plotly
