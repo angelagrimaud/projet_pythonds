@@ -4,3 +4,7 @@ pyarrow
 numpy
 plotly
 scipy
+pmdarima
+matplotlib
+statsmodels
+scikit-learn
