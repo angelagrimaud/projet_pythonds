@@ -20,11 +20,9 @@ Peut-on prédire les variations à court terme de la consommation d'électricit�
 ## Navigation au sein du projet : 
 L'essentiel de notre travail se situe au sein du dossier `notebooks`.
 
-Les notebooks `analyse_conso.ipynb` et `analyse_meteo.ipynb` s'attèlent à nettoyer et traiter les données utiles au projet (données sur la consommation d'électricité et données météorologiques, respectivement), à les mettre sous un format adapté à leur traitement, et proposent également quelques visualisations intéressantes.
-
 Le notebook `pred_conso.ipynb` propose une modélisation de la consommation électrique de la ville de Paris à partir des données historiques en recourant à la théorie des séries temporelles.
 
-Le notebook `pred_temperature.ipynb` prolonge et affine le travail de modélisation présenté dans le précédent notebook en prenant en compte les données de température.
+Le notebook `notebook_temperature.ipynb` prolonge et affine le travail de modélisation présenté dans le précédent notebook en prenant en compte les données de température. En première partie, il s'attèle à nettoyer et traiter les données issues des stations météorologiques, et en seconde partie il modélise la variation de consommation électrique en ajoutant les données météorologiques comme variable externe.
 
 ## Remarque sur la reproductibilité : 
 Le fichier `requirements.txt` donne la liste des paquets dont l'installation est nécessaire au bon fonctionnement des différents scripts. 
