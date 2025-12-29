@@ -124,3 +124,150 @@ def graph(startdate, enddate, df) :
     fig.update_layout(width=850, height=400, title='Consommation électrique de la ' + str(df['met'].iloc[0]))
     
     fig.show()
+
+
+#définir saison
+def saison(mois):
+    if mois in [12, 1, 2]:
+        return 'hiver'
+    elif mois in [6, 7, 8]:
+        return 'été'
+    else:
+        return 'printemps/automne'
+
+
+#adaptation du df aux besoins de visualisation
+def df_visual (df) :
+    #on ne garde que la colonne conso
+    df = df[['conso_final']].copy()
+    
+    #créer nouvelles colonnes
+    df['heure_quart'] = df.index.hour + df.index.minute / 60
+    df['heure'] = df.index.hour
+    df['jour_semaine'] = df.index.day_name()  #en anglais
+    df['is_weekend'] = df.index.weekday >= 5   #True/False
+    df['mois'] = df.index.month
+    df['saison'] = df['mois'].apply(saison)
+
+    return df
+
+
+def tendance(df, n=60) :
+    window = n*96  #n jours = n*96 observations puisque 1 jour=96 observations
+    
+    df['moy'] = df['conso_final'].rolling(window=window, center=True, min_periods=window//2).mean()
+    
+    plt.figure(figsize=(14,5))
+    plt.plot(df.index, df['conso_final'], alpha=0.15, label='Consommation brute')
+    plt.plot(df.index, df['moy'], linewidth=2.5, label='Moyenne glissante sur ' + str(n) + ' jours')
+    
+    plt.title("Tendance de fond")
+    plt.xlabel("Année")
+    plt.ylabel("Consommation")
+    plt.legend()
+    plt.tight_layout()
+    plt.show()
+
+
+#formatter pour afficher les nombres en millions
+def millions(x, pos):
+    return f'{x/1e6:.1f} M'
+
+#graphe des conso totales par année et par mois
+def conso_tot(df) :
+    formatter = FuncFormatter(millions)
+    
+    #conso annuelle
+    yearly = df['conso_final'].resample('YE').sum()
+    
+    #conso mensuelle
+    monthly_sum = df['conso_final'].groupby(df.index.month).sum()
+    months = ['Jan', 'Fév', 'Mar', 'Avr', 'Mai', 'Juin', 'Juil', 'Août', 'Sep', 'Oct', 'Nov', 'Déc']
+    
+    #subplots
+    fig, (ax1, ax2) = plt.subplots(2, 1, figsize=(12, 10))
+    
+    #graph conso annuelle
+    bars1 = ax1.bar(yearly.index.year, yearly.values, color='skyblue')
+    ax1.set_title("Consommation annuelle")
+    ax1.set_xlabel("Année")
+    ax1.set_ylabel("Consommation")
+    ax1.grid(axis='y', alpha=0.3)
+    ax1.yaxis.set_major_formatter(formatter)
+    ax1.bar_label(bars1, labels=[f'{v/1e6:.1f} M' for v in yearly.values], padding=3)
+    
+    #graph conso mensuelle
+    bars2 = ax2.bar(months, monthly_sum.values, color='salmon')
+    ax2.set_title("Consommation mensuelle cumulée sur la période")
+    ax2.set_xlabel("Mois")
+    ax2.set_ylabel("Consommation")
+    ax2.grid(axis='y', alpha=0.3)
+    ax2.yaxis.set_major_formatter(formatter)
+    ax2.bar_label(bars2, labels=[f'{v/1e6:.1f} M' for v in monthly_sum.values], padding=3)
+    
+    plt.tight_layout()
+    plt.show()
+
+
+def heatmap(df) :
+    #ordre des jours
+    jours_ordre = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday']
+    
+    #mise en forme des data
+    heatmap_data = df.pivot_table(index='jour_semaine', columns='heure', values='conso_final', aggfunc='mean')
+    heatmap_data = heatmap_data.reindex(jours_ordre)  # remettre dans l'ordre correct
+    
+    #heatmap
+    plt.figure(figsize=(15, 6))
+    sns.heatmap(heatmap_data, cmap='YlOrRd', annot=False)
+    plt.title("Consommation électrique par jour de la semaine x heure")
+    plt.xlabel("Heure")
+    plt.ylabel("Jour de la semaine")
+    plt.tight_layout()
+    plt.show()
+
+
+def profil_semaine_we (df) :
+    profil_semaine = df[df['is_weekend']==False].groupby('heure_quart')['conso_final'].mean()
+    profil_weekend = df[df['is_weekend']==True].groupby('heure_quart')['conso_final'].mean()
+    
+    plt.figure(figsize=(12,5))
+    plt.plot(profil_semaine.index, profil_semaine.values, label='Semaine')
+    plt.plot(profil_weekend.index, profil_weekend.values, label='Week-end')
+    plt.xlabel("Heure")
+    plt.ylabel("Consommation moyenne")
+    plt.title("Profil journalier moyen : Semaine vs Week-end")
+    plt.legend()
+    plt.grid(True)
+    plt.show()
+
+
+def profil_jour_semaine(df) :
+    jours_ordre = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday']
+    
+    plt.figure(figsize=(12,6))
+    for jour in jours_ordre:
+        profil_jour = df[df['jour_semaine']==jour].groupby('heure_quart')['conso_final'].mean()
+        plt.plot(profil_jour.index, profil_jour.values, label=jour)
+    
+    plt.xlabel("Heure")
+    plt.ylabel("Consommation moyenne")
+    plt.title("Profil journalier moyen par jour de la semaine")
+    plt.legend()
+    plt.grid(True)
+    plt.show()
+
+    
+def profil_ete_hiver (df) :
+    profil_ete = df[df['saison']=='été'].groupby('heure_quart')['conso_final'].mean()
+    profil_hiver = df[df['saison']=='hiver'].groupby('heure_quart')['conso_final'].mean()
+    
+    plt.figure(figsize=(12,5))
+    plt.plot(profil_ete.index, profil_ete.values, label='Été')
+    plt.plot(profil_hiver.index, profil_hiver.values, label='Hiver')
+    plt.xlabel("Heure")
+    plt.ylabel("Consommation moyenne")
+    plt.title("Profil journalier moyen : Été vs Hiver")
+    plt.legend()
+    plt.grid(True)
+    plt.show()
