@@ -7,6 +7,7 @@ import plotly.express as px
 import matplotlib.pyplot as plt
 import plotly.graph_objects as go
 from matplotlib.ticker import FuncFormatter
+from statsmodels.tsa.stattools import adfuller
 
 
 #importation du df
@@ -271,3 +272,26 @@ def profil_ete_hiver (df) :
     plt.legend()
     plt.grid(True)
     plt.show()
+
+
+#fonction testant la stationnarité d'une série au seuil de 5%
+def adf_table(series, alpha=0.05):
+    results = []
+    dgp = {'n' : 'DGP1', 'c' : 'DGP2', 'ct' : 'DGP3'}
+
+    for reg, label in dgp.items():
+        adf_result = adfuller(series, regression=reg)
+
+        adf_stat = adf_result[0]
+        crit_value = adf_result[4]['5%']
+
+        conclusion = "Stationnaire" if adf_stat < crit_value else "Non stationnaire"
+
+        results.append({
+            "DGP": label,
+            "ADF statistic": adf_stat,
+            "Valeur critique (5%)": crit_value,
+            "Conclusion": conclusion
+        })
+
+    return pd.DataFrame(results)
