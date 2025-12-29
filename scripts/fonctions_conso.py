@@ -1,9 +1,12 @@
 import numpy as np
 import pandas as pd
+import seaborn as sns
 from scipy import stats
 from datetime import date
 import plotly.express as px
+import matplotlib.pyplot as plt
 import plotly.graph_objects as go
+from matplotlib.ticker import FuncFormatter
 
 
 #importation du df
