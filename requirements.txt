@@ -8,3 +8,4 @@ pmdarima
 matplotlib
 statsmodels
 scikit-learn
+seaborn
